@@ -31,6 +31,19 @@
 		addEmoteDialogMode = "shown";
 	}
 
+	let toastMessage = $state<string | null>(null);
+	let toastVisible = $state(false);
+
+	function showToast(message: string) {
+		toastMessage = message;
+		toastVisible = true;
+
+		setTimeout(() => {
+			toastVisible = false;
+			toastMessage = null;
+		}, 2000);
+	}
+
 	function copyLink() {
 		const url = new URL(`/emotes/${data.id}`, $page.url).href;
 		navigator.clipboard.writeText(url);
@@ -39,36 +52,17 @@
 	}
 
 	function copyCdn2x() {
- 	   if (!data || !data.id) return;
+		if (!data || !data.id) return;
 
- 	  const emoteId = data.id;
- 	   const url = `https://cdn.7tv.app/emote/${emoteId}/2x.avif`;
+		const emoteId = data.id;
+		const url = `https://cdn.7tv.app/emote/${emoteId}/2x.avif`;
 
-    	navigator.clipboard.writeText(url)
-        	.then(() => showToast("2x CDN link copied!"))
-        	.catch(() => showToast("Failed to copy CDN link!"));
+		navigator.clipboard
+			.writeText(url)
+			.then(() => showToast("2x CDN link copied!"))
+			.catch(() => showToast("Failed to copy CDN link!"));
 
-    	hide();
-	}
-
-
-	function showToast(message: string) {
-		const toast = document.createElement("div");
-		toast.textContent = message;
-		Object.assign(toast.style, {
-			position: "fixed",
-			bottom: "2rem",
-			left: "50%",
-			transform: "translateX(-50%)",
-			background: "var(--bg-dark)",
-			color: "white",
-			padding: "0.5rem 1rem",
-			borderRadius: "0.25rem",
-			zIndex: "9999",
-			fontSize: "0.875rem",
-		});
-		document.body.appendChild(toast);
-		setTimeout(() => toast.remove(), 2000);
+		hide();
 	}
 
 	function onContextMenu(e: MouseEvent) {
@@ -108,10 +102,16 @@
 			</Button>
 
 			<Button big on:click={copyCdn2x}>
-    			{#snippet icon()}<Clipboard />{/snippet}
-			    Copy CDN Link (2x)
+				{#snippet icon()}<Clipboard />{/snippet}
+				Copy CDN Link (2x)
 			</Button>
 		</nav>
+	</div>
+{/if}
+
+{#if toastVisible && toastMessage}
+	<div class="toast" transition:fade={{ duration: 100 }}>
+		{toastMessage}
 	</div>
 {/if}
 
@@ -134,5 +134,19 @@
 			padding: 0.5rem;
 			z-index: 150;
 		}
+	}
+
+	.toast {
+		position: fixed;
+		bottom: 2rem;
+		left: 50%;
+		transform: translateX(-50%);
+		background: var(--bg-dark);
+		color: white;
+		padding: 0.5rem 1rem;
+		border-radius: 0.25rem;
+		z-index: 9999;
+		font-size: 0.875rem;
+		pointer-events: none;
 	}
 </style>
